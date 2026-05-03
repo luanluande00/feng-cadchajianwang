@@ -46,3 +46,7 @@ prisma/dev.db*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Temp & Trae
+temp_backup/
+.trae/
