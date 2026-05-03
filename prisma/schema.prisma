@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  username      String    @unique
+  avatar        String?
+  points        Int       @default(0)
+  totalEarned   Int       @default(0)
+  role          String    @default("USER")
+  isVerified    Boolean   @default(false)
+  verifyToken   String?
+  verifyTokenExpiry DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now())
+  
+  plugins       Plugin[]
+  downloads     Download[]
+  transactions  Transaction[]
+  paymentOrders PaymentOrder[]
+  parentUserId  String?
+  parentUser    User?     @relation("ParentChildren", fields: [parentUserId], references: [id])
+  children      User[]    @relation("ParentChildren")
+
+  @@map("users")
+}
+
+model Plugin {
+  id            String     @id @default(uuid())
+  name          String
+  description   String
+  coverImage    String     @default("")
+  fileUrl       String     @default("")
+  price         Int
+  category      String
+  status        String     @default("PENDING")
+  downloads     Int        @default(0)
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @default(now())
+  
+  downloadRecords Download[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("plugins")
+}
+
+model Download {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  pluginId    String
+  plugin      Plugin   @relation(fields: [pluginId], references: [id])
+  pointsSpent Int
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([pluginId])
+  @@map("downloads")
+}
+
+model Transaction {
+  id          String     @id @default(uuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  type        String
+  amount      Int
+  description String
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+  @@map("transactions")
+}
+
+model PaymentOrder {
+  id          String     @id @default(uuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  amount      Int
+  points      Int
+  status      String     @default("PENDING")
+  paymentUrl  String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now())
+
+  @@index([userId])
+  @@index([status])
+  @@map("payment_orders")
+}
