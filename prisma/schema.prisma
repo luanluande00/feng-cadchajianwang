@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String    @id @default(uuid())
+  id            String    @id @default(uuid()) @db.Uuid
   email         String    @unique
   password      String
   username      String    @unique
@@ -20,13 +20,13 @@ model User {
   verifyToken   String?
   verifyTokenExpiry DateTime?
   createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   
   plugins       Plugin[]
   downloads     Download[]
   transactions  Transaction[]
   paymentOrders PaymentOrder[]
-  parentUserId  String?
+  parentUserId  String?  @db.Uuid
   parentUser    User?     @relation("ParentChildren", fields: [parentUserId], references: [id])
   children      User[]    @relation("ParentChildren")
 
@@ -34,19 +34,19 @@ model User {
 }
 
 model Plugin {
-  id            String     @id @default(uuid())
+  id            String   @id @default(uuid()) @db.Uuid
   name          String
   description   String
-  coverImage    String     @default("")
-  fileUrl       String     @default("")
+  coverImage    String   @default("")
+  fileUrl       String   @default("")
   price         Int
   category      String
-  status        String     @default("PENDING")
-  downloads     Int        @default(0)
-  userId        String
-  user          User       @relation(fields: [userId], references: [id])
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now())
+  status        String   @default("PENDING")
+  downloads     Int      @default(0)
+  userId        String   @db.Uuid
+  user          User     @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   
   downloadRecords Download[]
 
@@ -56,10 +56,10 @@ model Plugin {
 }
 
 model Download {
-  id          String   @id @default(uuid())
-  userId      String
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
   user        User     @relation(fields: [userId], references: [id])
-  pluginId    String
+  pluginId    String   @db.Uuid
   plugin      Plugin   @relation(fields: [pluginId], references: [id])
   pointsSpent Int
   createdAt   DateTime @default(now())
@@ -70,28 +70,28 @@ model Download {
 }
 
 model Transaction {
-  id          String     @id @default(uuid())
-  userId      String
-  user        User       @relation(fields: [userId], references: [id])
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id])
   type        String
   amount      Int
   description String
-  createdAt   DateTime   @default(now())
+  createdAt   DateTime @default(now())
 
   @@index([userId])
   @@map("transactions")
 }
 
 model PaymentOrder {
-  id          String     @id @default(uuid())
-  userId      String
-  user        User       @relation(fields: [userId], references: [id])
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id])
   amount      Int
   points      Int
-  status      String     @default("PENDING")
+  status      String   @default("PENDING")
   paymentUrl  String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
