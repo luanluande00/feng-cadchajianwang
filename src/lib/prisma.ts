@@ -41,12 +41,8 @@ function getPrismaClient(): PrismaClient {
 async function ensureDb() {
   if (initPromise) return initPromise;
   initPromise = (async () => {
-    try {
-      const { ensureDatabase } = await import('@/lib/db-init');
-      await ensureDatabase();
-    } catch {
-      // db-init might not be available in all contexts
-    }
+    const { ensureDatabase } = await import('@/lib/db-init');
+    await ensureDatabase();
   })();
   return initPromise;
 }
