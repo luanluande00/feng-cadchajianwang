@@ -13,6 +13,7 @@
     "@neondatabase/api-client": "^2.7.1",
     "@prisma/client": "^5.14.0",
     "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.9.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.1.0",
     "jsonwebtoken": "^9.0.2",
