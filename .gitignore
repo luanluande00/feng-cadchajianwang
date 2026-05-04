@@ -50,3 +50,6 @@ next-env.d.ts
 # Temp & Trae
 temp_backup/
 .trae/
+
+.vercel
+.env*.local

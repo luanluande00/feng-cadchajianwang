@@ -7,12 +7,15 @@ const globalForPrisma = globalThis as unknown as {
 let prismaInstance: PrismaClient | null = null;
 let initPromise: Promise<void> | null = null;
 
+function isPlatformDeploy(): boolean {
+  return !!(process.env.VERCEL || process.env.NETLIFY || process.env.RENDER);
+}
+
 function getDbUrl(): string {
-  const url = process.env.DATABASE_URL || 'file:./dev.db';
-  if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+  if (isPlatformDeploy()) {
     return 'file:/tmp/dev.db';
   }
-  return url;
+  return process.env.DATABASE_URL || 'file:./dev.db';
 }
 
 function createPrismaClient(): PrismaClient {
@@ -29,7 +32,7 @@ function getPrismaClient(): PrismaClient {
     return prismaInstance;
   }
   prismaInstance = createPrismaClient();
-  if (process.env.NODE_ENV !== 'production' || process.env.VERCEL) {
+  if (process.env.NODE_ENV !== 'production' || isPlatformDeploy()) {
     globalForPrisma.prisma = prismaInstance;
   }
   return prismaInstance;
