@@ -78,7 +78,8 @@ export async function POST(request: NextRequest) {
     await setAuthCookie(token);
     return response;
   } catch (error) {
-    console.error('注册失败:', error);
-    return errorResponse('注册失败，请稍后重试', 500);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('注册失败:', errMsg);
+    return errorResponse(`注册失败: ${errMsg}`, 500);
   }
 }
