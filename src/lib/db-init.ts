@@ -1,11 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 
-function getDbPath(): string {
-  const url = process.env.DATABASE_URL || 'file:./dev.db';
-  return url.replace('file:', '');
-}
-
 let dbReady = false;
 
 const CREATE_TABLES_SQL = `
@@ -89,10 +84,10 @@ CREATE INDEX IF NOT EXISTS idx_payment_orders_userId ON payment_orders(userId);
 CREATE INDEX IF NOT EXISTS idx_payment_orders_status ON payment_orders(status);
 `;
 
-export async function ensureDatabase() {
+export async function ensureDatabase(dbUrl: string) {
   if (dbReady) return;
 
-  const dbPath = getDbPath();
+  const dbPath = dbUrl.replace('file:', '');
   const dbDir = path.dirname(dbPath);
 
   try {
@@ -115,7 +110,7 @@ export async function ensureDatabase() {
 
   const { PrismaClient } = await import('@prisma/client');
   const initClient = new PrismaClient({
-    datasources: { db: { url: `file:${dbPath}` } },
+    datasources: { db: { url: dbUrl } },
     log: ['error'],
   });
 
