@@ -103,18 +103,44 @@ export async function ensureDatabase() {
     console.error('Cannot create db directory:', dbDir, e);
   }
 
-  const Database = (await import('better-sqlite3')).default;
+  if (!fs.existsSync(dbPath)) {
+    try {
+      fs.writeFileSync(dbPath, '');
+    } catch (e) {
+      console.error('Cannot create db file:', dbPath, e);
+      dbReady = true;
+      return;
+    }
+  }
+
+  const { PrismaClient } = await import('@prisma/client');
+  const initClient = new PrismaClient({
+    datasources: { db: { url: `file:${dbPath}` } },
+    log: ['error'],
+  });
 
   try {
-    const db = new Database(dbPath);
-    db.pragma('journal_mode = WAL');
-    db.exec(CREATE_TABLES_SQL);
-    db.close();
-    console.log('Database initialized successfully at', dbPath);
-  } catch (e) {
-    console.error('Database init with better-sqlite3 failed:', e);
-    dbReady = true;
-    return;
+    const result = await initClient.$queryRawUnsafe<Array<{ name: string }>>(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
+    );
+
+    if (!result || result.length === 0) {
+      console.log('Creating database tables...');
+      const statements = CREATE_TABLES_SQL
+        .split(';')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+
+      for (const stmt of statements) {
+        await initClient.$executeRawUnsafe(`${stmt};`);
+      }
+      console.log('Database tables created successfully');
+    }
+  } catch (error) {
+    console.error('Database init error:', error);
+    throw error;
+  } finally {
+    await initClient.$disconnect();
   }
 
   dbReady = true;
