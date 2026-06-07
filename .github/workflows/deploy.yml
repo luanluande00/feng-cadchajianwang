@@ -27,6 +27,12 @@ jobs:
         run: npx next build
 
       - name: Deploy to Netlify
-        run: npx netlify-cli deploy --dir=.next --prod --skip-functions-cache --site cybercad-plugins
+        uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: '.next'
+          production-deploy: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: 'Deploy from GitHub Actions - ${{ github.event.head_commit.message }}'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
