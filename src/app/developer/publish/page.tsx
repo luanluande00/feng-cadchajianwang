@@ -15,12 +15,10 @@ export default function PublishPage() {
   const [success, setSuccess] = useState('');
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
-  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
 
   const coverInputRef = useRef<HTMLInputElement>(null);
   const imagesInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -97,22 +95,6 @@ export default function PublishPage() {
     }
     setUploadingImages(false);
     if (imagesInputRef.current) imagesInputRef.current.value = '';
-  };
-
-  // 上传产品视频
-  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      setError('视频大小不能超过10MB');
-      return;
-    }
-    setUploadingVideo(true);
-    setError('');
-    const url = await uploadFile(file, 'video');
-    if (url) setForm({ ...form, productVideo: url });
-    setUploadingVideo(false);
-    if (videoInputRef.current) videoInputRef.current.value = '';
   };
 
   // 上传插件文件
@@ -295,12 +277,11 @@ export default function PublishPage() {
             </div>
           </div>
 
-          {/* 产品视频上传 */}
+          {/* 产品视频 - URL输入 */}
           <div>
             <label className="block text-gray-400 mb-2 font-rajdhani uppercase tracking-wider">
-              产品介绍视频 <span className="text-gray-500 text-sm normal-case">（可选，最大10MB，自动播放）</span>
+              产品介绍视频 <span className="text-gray-500 text-sm normal-case">（可选，粘贴视频链接，自动播放）</span>
             </label>
-            <input ref={videoInputRef} type="file" accept="video/mp4,video/webm" onChange={handleVideoUpload} className="hidden" />
             {form.productVideo ? (
               <div className="relative group">
                 <video
@@ -321,19 +302,17 @@ export default function PublishPage() {
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={() => videoInputRef.current?.click()}
-                disabled={uploadingVideo}
-                className="w-full h-24 border-2 border-dashed border-cyber-blue/30 rounded flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-cyber-blue/60 hover:text-cyber-blue transition-all"
-              >
-                {uploadingVideo ? (
-                  <><Loader2 className="h-6 w-6 animate-spin" /><span>上传中...</span></>
-                ) : (
-                  <><Video className="h-6 w-6" /><span>点击上传视频</span><span className="text-xs">MP4/WebM，最大10MB</span></>
-                )}
-              </button>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={form.productVideo}
+                  onChange={(e) => setForm({ ...form, productVideo: e.target.value })}
+                  className="flex-1 p-3 bg-cyber-input border border-cyber-blue/30 rounded text-white focus:outline-none focus:border-cyber-blue"
+                  placeholder="粘贴视频链接 (mp4/webm)"
+                />
+              </div>
             )}
+            <p className="text-gray-500 text-sm mt-1">支持 MP4/WebM 视频链接，上传后自动播放</p>
           </div>
 
           {/* 插件文件上传 */}
