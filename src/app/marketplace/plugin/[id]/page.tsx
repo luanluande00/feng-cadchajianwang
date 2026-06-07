@@ -134,8 +134,11 @@ export default function PluginDetailPage() {
                   autoPlay
                   muted
                   loop
+                  playsInline
+                  preload="auto"
                   className="w-full rounded border border-cyber-blue/30"
                   style={{ maxHeight: '400px' }}
+                  onCanPlay={(e) => { (e.target as HTMLVideoElement).play().catch(() => {}); }}
                 >
                   您的浏览器不支持视频播放
                 </video>
