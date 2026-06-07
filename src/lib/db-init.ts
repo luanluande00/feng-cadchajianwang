@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS plugins (
   description TEXT NOT NULL,
   coverImage TEXT NOT NULL DEFAULT '',
   fileUrl TEXT NOT NULL DEFAULT '',
+  productImages TEXT NOT NULL DEFAULT '',
+  productVideo TEXT NOT NULL DEFAULT '',
   price INTEGER NOT NULL,
   category TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'PENDING',

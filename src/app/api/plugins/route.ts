@@ -16,8 +16,17 @@ export async function GET(request: NextRequest) {
     const { page, limit } = parsePagination(request.nextUrl);
     const search = request.nextUrl.searchParams.get('search') || '';
     const category = request.nextUrl.searchParams.get('category') || '';
+    const mine = request.nextUrl.searchParams.get('mine') === 'true';
 
-    const where: any = { status: 'APPROVED' };
+    // mine=true 时显示当前用户的所有插件（不限状态），否则只显示已通过的
+    const where: any = {};
+    if (mine) {
+      const userId = await getCurrentUserId();
+      if (!userId) return errorResponse('请先登录', 401);
+      where.userId = userId;
+    } else {
+      where.status = 'APPROVED';
+    }
 
     if (search) {
       where.OR = [
@@ -85,12 +94,14 @@ export async function POST(request: NextRequest) {
         price,
         coverImage: body.coverImage || '',
         fileUrl: body.fileUrl || '',
+        productImages: body.productImages || '',
+        productVideo: body.productVideo || '',
         userId,
-        status: 'PENDING',
+        status: 'APPROVED',
       },
     });
 
-    return successResponse(plugin, '插件提交成功，等待审核', 201);
+    return successResponse(plugin, '插件发布成功', 201);
   } catch (error) {
     console.error('发布插件失败:', error);
     return errorResponse('发布插件失败', 500);

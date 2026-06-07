@@ -53,4 +53,9 @@ temp_backup/
 
 .vercel
 .env*.local
+
+# Uploads (ephemeral on Netlify)
+public/uploads/
+
+# Netlify
 .netlify/

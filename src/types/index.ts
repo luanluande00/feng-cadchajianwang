@@ -23,6 +23,8 @@ export interface Plugin {
   description: string;
   coverImage: string;
   fileUrl: string;
+  productImages: string;
+  productVideo: string;
   price: number;
   category: string;
   status: PluginStatus;

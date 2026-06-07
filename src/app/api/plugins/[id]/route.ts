@@ -32,7 +32,15 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const body = await request.json();
     const updatedPlugin = await prisma.plugin.update({
       where: { id: params.id },
-      data: { name: body.name || plugin.name, description: body.description || plugin.description, price: body.price !== undefined ? body.price : plugin.price, coverImage: body.coverImage || plugin.coverImage },
+      data: {
+        name: body.name || plugin.name,
+        description: body.description || plugin.description,
+        price: body.price !== undefined ? body.price : plugin.price,
+        coverImage: body.coverImage !== undefined ? body.coverImage : plugin.coverImage,
+        productImages: body.productImages !== undefined ? body.productImages : plugin.productImages,
+        productVideo: body.productVideo !== undefined ? body.productVideo : plugin.productVideo,
+        fileUrl: body.fileUrl !== undefined ? body.fileUrl : plugin.fileUrl,
+      },
     });
     return successResponse(updatedPlugin, '更新成功');
   } catch (error) {

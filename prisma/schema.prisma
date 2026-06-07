@@ -40,6 +40,8 @@ model Plugin {
   description   String
   coverImage    String     @default("")
   fileUrl       String     @default("")
+  productImages String     @default("")
+  productVideo  String     @default("")
   price         Int
   category      String
   status        String     @default("PENDING")

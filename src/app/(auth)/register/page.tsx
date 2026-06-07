@@ -38,6 +38,7 @@ export default function RegisterPage() {
         // 自动验证模式下直接跳转首页
         if (data.data?.autoVerified) {
           router.push('/');
+          router.refresh();
         } else {
           router.push('/verify?sent=true');
         }

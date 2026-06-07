@@ -84,8 +84,14 @@ export default function MarketplacePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {plugins.map((plugin) => (
             <Card key={plugin.id} className="flex flex-col">
-              <div className="h-48 bg-gradient-to-br from-cyber-blue/20 to-cyber-purple/20 rounded mb-4 flex items-center justify-center">
-                <Star className="h-12 w-12 text-cyber-blue" />
+              <div className="h-48 rounded mb-4 overflow-hidden flex items-center justify-center">
+                {plugin.coverImage ? (
+                  <img src={plugin.coverImage} alt={plugin.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-cyber-blue/20 to-cyber-purple/20 flex items-center justify-center">
+                    <Star className="h-12 w-12 text-cyber-blue" />
+                  </div>
+                )}
               </div>
               <h3 className="font-rajdhani text-xl font-bold mb-2">{plugin.name}</h3>
               <p className="text-gray-400 text-sm mb-4 line-clamp-2">{plugin.description}</p>

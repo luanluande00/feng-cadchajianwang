@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { GlitchText } from '@/components/cyberpunk/GlitchText';
-import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Eye, Download } from 'lucide-react';
 import Link from 'next/link';
 
 const statusLabels: Record<string, string> = {
@@ -28,13 +28,37 @@ export default function MyPluginsPage() {
     fetch('/api/auth/me')
       .then(r => r.json())
       .then(d => {
-        if (!d.success) router.push('/login');
+        if (!d.success) {
+          router.push('/login');
+          return;
+        }
+        // 加载该用户的插件列表
+        return fetch('/api/plugins?mine=true');
       })
-      .catch(() => router.push('/login'));
-
-    setPlugins([]);
-    setLoading(false);
+      .then(r => r ? r.json() : null)
+      .then(d => {
+        if (d?.success && d.data) {
+          setPlugins(d.data.data || []);
+        }
+        setLoading(false);
+      })
+      .catch(() => { router.push('/login'); setLoading(false); });
   }, [router]);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('确定删除该插件？')) return;
+    try {
+      const res = await fetch(`/api/plugins/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setPlugins(plugins.filter(p => p.id !== id));
+      } else {
+        alert(data.message || '删除失败');
+      }
+    } catch {
+      alert('删除失败');
+    }
+  };
 
   if (loading) return <div className="container mx-auto px-4 py-20 text-center"><p className="text-cyber-blue">加载中...</p></div>;
 
@@ -58,18 +82,33 @@ export default function MyPluginsPage() {
           {plugins.map((p: any) => (
             <Card key={p.id}>
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-lg">{p.name}</h3>
-                  <p className="text-gray-400 text-sm">{p.downloads} 次下载 · {p.price} 积分</p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-1">
+                    <h3 className="font-bold text-lg">{p.name}</h3>
+                    <span className={`text-sm ${statusColors[p.status] || 'text-gray-400'}`}>
+                      {statusLabels[p.status] || p.status}
+                    </span>
+                  </div>
+                  <p className="text-gray-400 text-sm">{p.description?.substring(0, 80)}{p.description?.length > 80 ? '...' : ''}</p>
+                  <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                    <span className="flex items-center gap-1"><Download className="h-3 w-3" /> {p.downloads} 次下载</span>
+                    <span>{p.price} 积分</span>
+                    <span>{p.category}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className={statusColors[p.status] || 'text-gray-400'}>
-                    {statusLabels[p.status] || p.status}
-                  </span>
-                  <Link href={`/developer/publish?id=${p.id}`}>
-                    <button className="text-cyber-blue hover:text-cyber-pink transition-colors"><Edit className="h-4 w-4" /></button>
+                <div className="flex items-center gap-2 ml-4">
+                  <Link href={`/marketplace/plugin/${p.id}`}>
+                    <button className="p-2 text-cyber-blue hover:text-cyber-pink transition-colors" title="查看">
+                      <Eye className="h-4 w-4" />
+                    </button>
                   </Link>
-                  <button className="text-red-500 hover:text-red-400 transition-colors"><Trash2 className="h-4 w-4" /></button>
+                  <button
+                    className="p-2 text-red-500 hover:text-red-400 transition-colors"
+                    title="删除"
+                    onClick={() => handleDelete(p.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             </Card>
